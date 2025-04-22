@@ -6,8 +6,8 @@
     ["lib/led.py", "http://localhost:8000/pico-lib/led.py"],
     ["lib/ssd1306.mpy", "http://localhost:8000/pico-lib/ssd1306.mpy"],
     ["lib/umqtt/simple.mpy", "http://localhost:8000/pico-lib/umqtt/simple.mpy"],
-	["lib/filo.py", "http://localhost:8000/lib/filo.mpy"],
-	["lib/rollingaverage.py", "http://localhost:8000/lib/rollingaverage.mpy"]
+	["lib/filo.py", "http://localhost:8000/lib/filo.py"],
+	["lib/rollingaverage.py", "http://localhost:8000/lib/rollingaverage.py"]
   ],
   "deps": [
   ],
