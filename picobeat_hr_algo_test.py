@@ -15,6 +15,7 @@ class isr_adc:
         self.samples.put(self.av.read_u16())
 
 # GPIO PINS --------------------------------------------------------------------
+button = Pin(12, mode = Pin.IN, pull = Pin.PULL_UP)
 SENSOR_PIN = 26
 SDA_PIN = 14
 SCL_PIN = 15
@@ -44,6 +45,7 @@ peaks = []									# All recorded peaks
 last_samples_avg_10 = RollAvg(size=10)		# Rolling average of last 10 samples
 last_samples_avg_40 = RollAvg(size=40)		# Rolling average of last 40 samples
 last_samples_raw = Filo(250, typecode = "i")# Last 250 raw sample values
+last_peak = None 							# Last peak timestamp(tick)
 bpm = 0										# Current BPM
 lts_min = None								# Last second lowest value
 lts_max = None								# Last second highest value
@@ -52,6 +54,7 @@ TRESHOLD = 0.7								# Peak detection treshold
 cur_cooldown = 0							# Time since artifact(ms)
 COOLDOWN = 500								# Total cooldown(ms)
 last_artifact_timestamp = 0					# Last artifact timestamp(tick)
+artifact_count = 0							# Total amount of artifacts
 thread_running = True						# Global flag for stopping 2. thread
 
 # Loading screen ---------------------------------------------------------------
@@ -147,11 +150,11 @@ def stop():
     
     # Print total samples recorded.
     # DEBUG
-    print("Total samples recorded: {sample_n}")
+    print(f"Total samples recorded: {sample_n}")
     # Print total time elapsed.
     # DEBUG
     time_since_start = time.ticks_diff(time.ticks_ms(), start_time) / 1000
-    print("Total time elapsed: {time_since_start}s")
+    print(f"Total time elapsed: {time_since_start}s")
     
     # Stop timer.
     SENSOR_TIMER.deinit()
@@ -188,6 +191,9 @@ _thread.start_new_thread(draw_graph, ())
 
 # Main loop --------------------------------------------------------------------
 while True:
+    if button() == 0:
+        stop()
+        break
     if SENSOR.samples.has_data():
         sample = SENSOR.samples.get()	# Get sample from sensor fifo.
         
@@ -195,6 +201,7 @@ while True:
         cur_cooldown = time.ticks_diff(time.ticks_ms(), last_artifact_timestamp)
         if (sample < 10000 or sample > 60000) and cur_cooldown > COOLDOWN:
             print("Pulse artifact")
+            artifact_count += 1
             last_artifact_timestamp = time.ticks_ms()
             continue
         
@@ -207,9 +214,9 @@ while True:
         
         # Calculate peak-to-peak interval. -------------------------------------
         interval = 0	# Time since last peak, in milliseconds
-        if peaks:
+        if last_peak != None :
             # Calculate the time since last peak in milliseconds
-            interval = time.ticks_diff(time.ticks_ms(), peaks[-1][1])
+            interval = time.ticks_diff(time.ticks_ms(), last_peak)
         else:
             # If there is no peaks so far, interval is time since start
             # Not the best approach. Maybe FIX.
@@ -220,8 +227,12 @@ while True:
             timestamp = time.ticks_ms()
             #print("PEAK!", sample_n)	# DEBUG
             
+            last_peak = timestamp
+            
             # Filter heart beat echo
             if interval < 300:
+                continue
+            elif interval > 1700:
                 continue
             
             # Create array element to store peak data
