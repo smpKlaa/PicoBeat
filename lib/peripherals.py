@@ -70,6 +70,6 @@ class IRS_ADC:
         """get just calls the internal fifo's method."""
         return self.fifo.get()
     
-    def has_data():
+    def has_data(self):
         """has_data just calls the internal fifo's method."""
         return self.fifo.has_data()
