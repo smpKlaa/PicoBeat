@@ -50,10 +50,10 @@ class RotaryEncoder:
             return self.fifo.get()
 
 
-class ISR_ADC:
+class IRS_ADC:
     """
-    ISR_ADC class for siplifying the use of ADC devices with continuous
-    data streams. ISR_ADC has it's internal fifo list that can be interfaced
+    IRS_ADC class for siplifying the use of ADC devices with continuous
+    data streams. IRS_ADC has it's internal fifo list that can be interfaced
     with the class.
     
     PARAMS:
