@@ -3,7 +3,7 @@ from time import sleep
 from umqtt.simple import MQTTClient
 
 class Networker:
-    # Handles WiFi and MQTT connection.
+    # Handles WiFi and MQTT connection
     def __init__(self, ssid, password, broker_ip):
         self.ssid = ssid
         self.password = password
@@ -11,7 +11,7 @@ class Networker:
         self.client = None
 
     def connect_wifi(self):
-        # Connect to WiFi network.
+        # Connect to WiFi network
         wlan = network.WLAN(network.STA_IF)
         wlan.active(True)
         if not wlan.isconnected():
@@ -27,7 +27,7 @@ class Networker:
             raise RuntimeError("Failed to connect to WiFi")
 
     def connect_mqtt(self, client_id, sub_topic=None, callback=None):
-        # Connect to MQTT broker and subscribe to a topic.
+        # Connect to MQTT broker and subscribe to a topic
         self.client = MQTTClient(client_id, self.broker_ip, port=1883)
 
         if callback:
@@ -42,23 +42,23 @@ class Networker:
             print(f"Subscribed to topic: {sub_topic}")
 
     def publish(self, topic, payload):
-        # Publish a message to a topic.
+        # Publish a message to a topic
         if self.client:
             print(f"Publishing to {topic}...")
             self.client.publish(topic, payload)
 
     def check_messages(self):
-        # Non-blocking check for incoming MQTT messages.
+        # Check for incoming MQTT messages
         if self.client:
             self.client.check_msg()
 
     def wait_for_message(self):
-        # Blocking wait for a single incoming MQTT message.
+        # Wait for a single incoming MQTT message
         if self.client:
             self.client.wait_msg()
 
     def disconnect(self):
-        # Disconnect from MQTT broker.
+        # Disconnect from MQTT broker
         if self.client:
             self.client.disconnect()
             print("Disconnected from MQTT.")
