@@ -1,38 +1,64 @@
 import network
-import mip
 from time import sleep
 from umqtt.simple import MQTTClient
 
-# :21883
+class Networker:
+    # Handles WiFi and MQTT connection.
+    def __init__(self, ssid, password, broker_ip):
+        self.ssid = ssid
+        self.password = password
+        self.broker_ip = broker_ip
+        self.client = None
 
-# Replace these values with your own
-SSID = ""
-PASSWORD = ""
-BROKER_IP = ""
+    def connect_wifi(self):
+        # Connect to WiFi network.
+        wlan = network.WLAN(network.STA_IF)
+        wlan.active(True)
+        if not wlan.isconnected():
+            print("Connecting to WiFi...")
+            wlan.connect(self.ssid, self.password)
+            retry = 0
+            while not wlan.isconnected() and retry < 20:
+                sleep(1)
+                retry += 1
+        if wlan.isconnected():
+            print("Connected to WiFi. IP:", wlan.ifconfig()[0])
+        else:
+            raise RuntimeError("Failed to connect to WiFi")
 
-# Function to connect to WLAN
-def connect_wlan():
-    # Connecting to the group WLAN
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
-    wlan.connect(SSID, PASSWORD)
+    def connect_mqtt(self, client_id, sub_topic=None, callback=None):
+        # Connect to MQTT broker and subscribe to a topic.
+        self.client = MQTTClient(client_id, self.broker_ip, port=1883)
 
-    # Attempt to connect once per second
-    while wlan.isconnected() == False:
-        print("Connecting... ")
-        sleep(1)
+        if callback:
+            self.client.set_callback(callback)
 
-    # Print the IP address of the Pico
-    print("Connection successful. Pico IP:", wlan.ifconfig()[0])
+        print("Connecting to MQTT Broker...")
+        self.client.connect()
+        print("Connected to MQTT Broker.")
 
-# Function to install MQTT
-def install_mqtt():
-    try:
-        mip.install("umqtt.simple")
-    except Exception as e:
-        print(f"Could not install MQTT: {e}")
+        if sub_topic:
+            self.client.subscribe(sub_topic)
+            print(f"Subscribed to topic: {sub_topic}")
 
-def connect_mqtt():
-    mqtt_client = MQTTClient("", BROKER_IP)
-    mqtt_client.connect(clean_session=True)
-    return mqtt_client
+    def publish(self, topic, payload):
+        # Publish a message to a topic.
+        if self.client:
+            print(f"Publishing to {topic}...")
+            self.client.publish(topic, payload)
+
+    def check_messages(self):
+        # Non-blocking check for incoming MQTT messages.
+        if self.client:
+            self.client.check_msg()
+
+    def wait_for_message(self):
+        # Blocking wait for a single incoming MQTT message.
+        if self.client:
+            self.client.wait_msg()
+
+    def disconnect(self):
+        # Disconnect from MQTT broker.
+        if self.client:
+            self.client.disconnect()
+            print("Disconnected from MQTT.")
