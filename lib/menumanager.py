@@ -2,7 +2,7 @@ import time
 from machine import Pin
 
 class MenuManager:
-    # Class for handling the Main Menu systen and simple screen messages.
+    # Class for handling the Main Menu system and simple screen messages.
     def __init__(self, oled, encoder, button_pin):
         self.oled = oled
         self.encoder = encoder
@@ -22,7 +22,7 @@ class MenuManager:
         self._draw_menu(menu_items, selected) # Draw the initial menu
         
         
-        # Delay after entering Main Menu
+        # 0.5 sec delay after entering Main Menu
         time.sleep(0.5)
         while self.button.value() == 0:
             time.sleep(0.01)
