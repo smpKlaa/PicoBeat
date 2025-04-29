@@ -7,6 +7,7 @@ from peripherals import RotaryEncoder
 import ssd1306
 import mip
 import WIP_HRV
+import introtext
 
 SSID = ""
 PASSWORD = ""
@@ -25,6 +26,9 @@ class Main:
         # Initialize OLED with I2C pin
         self.OLED = ssd1306.SSD1306_I2C(128, 64, self.i2c)
         
+        introtext.draw_splash_screen()
+        
+        # Initialize rotary encoder object
         self.re = RotaryEncoder(10, 11, scroll_speed=3)
         
         # Initialize HR algorithm object

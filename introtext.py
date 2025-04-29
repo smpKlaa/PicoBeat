@@ -200,41 +200,40 @@ heart_y = 30
 # List of all bitmaps and heart
 bitmaps = [P_bitmap, I_bitmap, C_bitmap, "heart", B_bitmap, E_bitmap, A_bitmap, T_bitmap]
 
-# Animation loop
-oled.fill(0)
-x_start = 0  # Starting X position
+def draw_splash_screen():
+    # Animation loop
+    oled.fill(0)
+    x_start = 0  # Starting X position
 
-for bmp in bitmaps:
-    if bmp == "heart":
-        draw_heart(x_start, 30)
-    else:
-        draw_bitmap(x_start, 30, bmp)
+    for bmp in bitmaps:
+        if bmp == "heart":
+            draw_heart(x_start, 30)
+        else:
+            draw_bitmap(x_start, 30, bmp)
+        oled.show()
+        time.sleep(0.1)  # Wait 0.1 seconds between letters
+        x_start += 16  # Move X position for next character
+
+    for _ in range(2):
+        time.sleep(0.2)
+        
+        # Shrink: clear heart area and draw 8x8 heart centered
+        oled.fill_rect(heart_x, heart_y, 16, 16, 0)
+        draw_small_heart(heart_x + 4, heart_y + 4)  # Center 8x8 inside 16x16 space
+        oled.show()
+        time.sleep(0.2)
+
+        # Grow back: clear small heart and draw big heart
+        oled.fill_rect(heart_x, heart_y, 16, 16, 0)
+        draw_heart(heart_x, heart_y)
+        oled.show()
+        time.sleep(0.2)
+
+
+    time.sleep(0.5)
+    oled.fill(0)
+    oled.text(f"Feel the Beat", 10, 30)
     oled.show()
-    time.sleep(0.1)  # Wait 0.1 seconds between letters
-    x_start += 16  # Move X position for next character
-
-for _ in range(2):
-    time.sleep(0.2)
-    
-    # Shrink: clear heart area and draw 8x8 heart centered
-    oled.fill_rect(heart_x, heart_y, 16, 16, 0)
-    draw_small_heart(heart_x + 4, heart_y + 4)  # Center 8x8 inside 16x16 space
+    time.sleep(1)
+    oled.fill(0)
     oled.show()
-    time.sleep(0.2)
-
-    # Grow back: clear small heart and draw big heart
-    oled.fill_rect(heart_x, heart_y, 16, 16, 0)
-    draw_heart(heart_x, heart_y)
-    oled.show()
-    time.sleep(0.2)
-
-
-time.sleep(0.5)
-oled.fill(0)
-oled.text(f"Feel the Beat", 10, 30)
-oled.show()
-time.sleep(1)
-oled.fill(0)
-oled.show()
-
-
