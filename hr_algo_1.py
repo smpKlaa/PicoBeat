@@ -66,10 +66,6 @@ class HRA:
 #         self._function()
 
     def start_recording(self, mode=None):
-        self.OLED.fill(0)
-        self.OLED.text("Initializing...", 0, 0, 1)
-        self.OLED.show()
-        
         # Set mode to 0 by default
         if not mode or (mode != 1 and mode != 2):
             mode = 0
@@ -117,60 +113,12 @@ class HRA:
         # Start thread 1
         _thread.start_new_thread(self.core_1_func, ())
 
-        # Buffer for graph line dots.
-        line_buffer = [32] * 64
-        
-        # Add sample value to graph line buffer.
-        def add_to_line(value):
-            line_buffer.pop(0)
-            line_buffer.append(value)
-            return
-        
-        self.measurement_ready = False
+        # Main loop ------------------------------------------------------------
         while True:
             # Rotary button stops recording.
             if self.rot_button() == 0:
                 self.stop()
                 break
-            if self.last_samples_avg_10.count > 0:
-                
-                if self.mode == 1 or self.mode == 2:
-                    # If measurement is not ready, update progress.
-                    if not self.measurement_ready:
-                        progress = time.ticks_diff(time.ticks_ms(), self.start_time) / 30000
-                        if progress >= 1:
-                            self.measurement_ready = True
-                            progress = 1
-                
-                self.OLED.fill(0)
-                
-                if self.measurement_ready:
-                    self.OLED.text("READY", 87, 0)
-                self.OLED.text(f"BPM:{self.bpm}", 0, 0)				# Current BPM
-                y = int(60 - (52 * self.last_samples_avg_10.get()))	# Sample Y coord
-                
-                add_to_line(y)
-                
-                # Threshold line for debugging.
-                self.OLED.line(0, 25, 127, 25, 1)
-                
-                # Draw graph to screen.
-                for x in range(1, len(line_buffer)):
-                    self.OLED.line((x - 1) * 2, line_buffer[x - 1],
-                                  (x * 2), line_buffer[x], 1)
-                
-                if self.mode == 1 or self.mode == 2:
-                    self.OLED.fill_rect(0, 60, int(127 * progress), 3, 1)
-                self.OLED.show()
-            
-        return self.peaks
-
-
-    # Function for 1. core. ----------------------------------------------------
-    def core_1_func(self):
-        print("[Core 1] Running...")
-        
-        while self.thread_running:
             if self.sensor.has_data():
                 sample = self.sensor.get()	# Get sample from sensor fifo.
                 
@@ -201,20 +149,100 @@ class HRA:
                 
                 # Check for peak. ----------------------------------------------
                 if self.is_peak(sample):
-                    print("PEAK")
-                    self.last_peak = time.ticks_ms()
+                    timestamp = time.ticks_ms()
+                    #print("PEAK!", sample_n)	# DEBUG
+                    
+                    self.last_peak = timestamp
                     
                     # Filter heart beat echo
                     if interval < 300:
                         continue
                     elif interval > 1700:
                         continue
-                    self.peaks.append(interval)
+                    
+                    # Create array element to store peak data
+                    arr = [self.sample_n, timestamp, interval, self.max_value]
+                    self.peaks.append(arr)
+                    
                     # Calculate current PPI
                     self.ppi_avg = self.ppi_roll_avg.update(interval)
                     # Calculate current BPM
                     self.bpm = int(60 / (self.ppi_avg / 1000))
+                
+                # DEBUG - Print BPM every 500 samples. -------------------------
+        #         if sample_n % 500 == 0:
+        #             print("BPM:", bpm)
 
+                # DEBUG - Stop measuring after 10 seconds. ---------------------
+        #         if time.ticks_diff(time.ticks_ms(), start_time) >= 10000:
+        #             stop()
+        #             print("STOPPED RECORDNING")
+        return self.peaks
+
+
+    # Function for 1. core. ----------------------------------------------------
+    def core_1_func(self):
+        print("[Core 1] Running...")
+        
+        # Buffer for graph line dots.
+        line_buffer = [32] * 64
+        
+        # Add sample value to graph line buffer.
+        def add_to_line(value):
+            line_buffer.pop(0)
+            line_buffer.append(value)
+            return
+        
+        if self.mode == 0:
+            while self.thread_running:
+                if self.last_samples_avg_10.count > 0:
+                    self.OLED.fill(0)
+                    
+                    self.OLED.text(f"BPM:{self.bpm}", 0, 0)				# Current BPM
+                    y = int(64 - (56 * self.last_samples_avg_10.get()))	# Sample Y coord
+                    
+                    # Threshold line for debugging.
+#                     self.OLED.line(0, 25, 127, 25, 1)
+                    
+                    add_to_line(y)
+                    for x in range(1, len(line_buffer)):
+                        self.OLED.line((x - 1) * 2, line_buffer[x - 1],
+                                      (x * 2), line_buffer[x], 1)
+                    
+                    self.OLED.show()
+        
+        elif self.mode == 1 or self.mode == 2:
+            self.measurement_ready = False
+            while self.thread_running:
+                if self.last_samples_avg_10.count > 0:
+                    
+                    # If measurement is not ready, update progress.
+                    if not self.measurement_ready:
+                        progress = time.ticks_diff(time.ticks_ms(), self.start_time) / 30000
+                        if progress >= 1:
+                            self.measurement_ready = True
+                            progress = 1
+                    
+                    self.OLED.fill(0)
+                    
+                    if self.measurement_ready:
+                        self.OLED.text("READY", 87, 0)
+                    self.OLED.text(f"BPM:{self.bpm}", 0, 0)				# Current BPM
+                    y = int(60 - (52 * self.last_samples_avg_10.get()))	# Sample Y coord
+                    
+                    add_to_line(y)
+                    
+                    # Threshold line for debugging.
+#                     self.OLED.line(0, 25, 127, 25, 1)
+                    
+                    # Draw graph to screen.
+                    for x in range(1, len(line_buffer)):
+                        self.OLED.line((x - 1) * 2, line_buffer[x - 1],
+                                      (x * 2), line_buffer[x], 1)
+                        
+                    self.OLED.fill_rect(0, 60, int(127 * progress), 3, 1)
+                    self.OLED.show()
+                    
                     
     def kubios_response(self, response):
         print(response)
@@ -288,7 +316,4 @@ class HRA:
 
 
 if __name__ == "__main__":
-    hra = HRA()
-    hra.start_recording(mode=1)
-
-
+    HRA(mode=1)

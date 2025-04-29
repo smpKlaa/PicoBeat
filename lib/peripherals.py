@@ -24,7 +24,12 @@ class RotaryEncoder:
             self.scroll_direction = -1
         
         if not scroll_speed:
-            scroll_speed = 1
+            scroll_speed = 1 
+#         if not rot_a:
+#             rot_a = 10
+#         if not rot_b:
+#             rot_b = 11
+          
         self.a = Pin(rot_a, mode = Pin.IN)
         self.b = Pin(rot_b, mode = Pin.IN)
         self._i = 0

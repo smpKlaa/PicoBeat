@@ -12,6 +12,7 @@ class MenuManager:
         self.last_button = 1
 
     def run_main_menu(self):
+        print("Main menu opened")
         # Draw and run the main menu. Return selected choice
         menu_items = [
             "Measure HR",

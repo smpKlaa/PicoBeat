@@ -10,6 +10,8 @@ import ntptime
 i2c = I2C(1, sda=Pin(14), scl=Pin(15), freq=400000)
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 
+button = Pin(12, Pin.IN, Pin.PULL_UP)
+
 #Test values
 # peaks need to be RR intervals (in milliseconds).
 #peaks =  [820, 830, 840, 830, 840, 850, 860, 870, 860, 850]
@@ -62,7 +64,8 @@ def display_results(results):
     
     oled.show()
 
-def analyze_and_display():
+def analyze_and_display(peaks):
+    global button
     # Calculate HRV metrics
     results = calculate_hrv(peaks)
     
@@ -79,6 +82,14 @@ def analyze_and_display():
         oled.text("Analysis failed", 0, 16)
         oled.text("Not enough data", 0, 32)
         oled.show()
+    
+    while True:
+        if button.value() == 1:
+            time.sleep(0.05)
+            if button.value() == 0:
+                return
 
-analyze_and_display()
 
+
+if __name__ == "__main__":
+    analyze_and_display()

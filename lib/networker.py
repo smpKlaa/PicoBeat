@@ -1,5 +1,6 @@
 import network
-from time import sleep
+import time
+import mip
 from umqtt.simple import MQTTClient
 
 class Networker:
@@ -17,14 +18,28 @@ class Networker:
         if not wlan.isconnected():
             print("Connecting to WiFi...")
             wlan.connect(self.ssid, self.password)
-            retry = 0
-            while not wlan.isconnected() and retry < 20:
-                sleep(1)
-                retry += 1
+            try:
+                retry = 0
+                while not wlan.isconnected() and retry < 10:
+                    time.sleep(1)
+                    print("Connecting...")
+                    retry += 1
+                if retry >= 10:
+                    raise RuntimeError("Connection timeout")
+            except Exception as e:
+                print("Failed to connect to WiFi: {e}")
+        
+        print("B")
         if wlan.isconnected():
             print("Connected to WiFi. IP:", wlan.ifconfig()[0])
         else:
             raise RuntimeError("Failed to connect to WiFi")
+
+    def install_mqtt(self):
+        try:
+            mip.install("umqtt.simple")
+        except Exception as e:
+            print(f"Could not install MQTT: {e}")
 
     def connect_mqtt(self, client_id, sub_topic=None, callback=None):
         # Connect to MQTT broker and subscribe to a topic
