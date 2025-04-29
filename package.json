@@ -12,7 +12,7 @@
     ["lib/networker.py", "http://localhost:8000/lib/networker.py"],
     ["lib/peripherals.py", "http://localhost:8000/lib/peripherals.py"],
   	["lib/rollingaverage.py", "http://localhost:8000/lib/rollingaverage.py"],
-  	["picobeat_hr_algo_test.py", "http://localhost:8000/picobeat_hr_algo_test.py"]
+  	["new_hr_algo.py", "http://localhost:8000/hr_algo.py"]
   ],
   "deps": [
   ],
