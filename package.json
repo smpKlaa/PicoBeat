@@ -12,7 +12,9 @@
     ["lib/networker.py", "http://localhost:8000/lib/networker.py"],
     ["lib/peripherals.py", "http://localhost:8000/lib/peripherals.py"],
   	["lib/rollingaverage.py", "http://localhost:8000/lib/rollingaverage.py"],
-  	["new_hr_algo.py", "http://localhost:8000/hr_algo.py"]
+  	["new_hr_algo.py", "http://localhost:8000/hr_algo.py"],
+    ["introtext.py", "http://localhost:8000/introtext.py"],
+    ["WIP_HRV.py", "http://localhost:8000/WIP_HRV.py"]
   ],
   "deps": [
   ],
