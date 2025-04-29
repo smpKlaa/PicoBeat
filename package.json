@@ -6,10 +6,13 @@
     ["lib/led.py", "http://localhost:8000/pico-lib/led.py"],
     ["lib/ssd1306.mpy", "http://localhost:8000/pico-lib/ssd1306.mpy"],
     ["lib/umqtt/simple.mpy", "http://localhost:8000/pico-lib/umqtt/simple.mpy"],
-	["lib/filo.py", "http://localhost:8000/lib/filo.py"],
-	["lib/rollingaverage.py", "http://localhost:8000/lib/rollingaverage.py"],
-  ["lib/peripherals.py", "http://localhost:8000/lib/peripherals.py"],
-	["picobeat_hr_algo_test.py", "http://localhost:8000/picobeat_hr_algo_test.py"]
+  	["lib/filo.py", "http://localhost:8000/lib/filo.py"],
+    ["lib/historian.py", "http://localhost:8000/lib/historian.py"],
+    ["lib/menumanager.py", "http://localhost:8000/lib/menumanager.py"],
+    ["lib/networker.py", "http://localhost:8000/lib/networker.py"],
+    ["lib/peripherals.py", "http://localhost:8000/lib/peripherals.py"],
+  	["lib/rollingaverage.py", "http://localhost:8000/lib/rollingaverage.py"],
+  	["picobeat_hr_algo_test.py", "http://localhost:8000/picobeat_hr_algo_test.py"]
   ],
   "deps": [
   ],
