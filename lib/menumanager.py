@@ -2,12 +2,13 @@ import time
 from machine import Pin
 
 class MenuManager:
+    BUTTON_PIN = 12
     # Class for handling the Main Menu system and simple screen messages
-    def __init__(self, oled, encoder, button_pin):
+    def __init__(self, oled, encoder):
         # Initialize MenuManager with OLED, encoder, and button pin
         self.oled = oled
         self.encoder = encoder
-        self.button = Pin(button_pin, Pin.IN, Pin.PULL_UP)
+        self.button = Pin(MenuManager.BUTTON_PIN, Pin.IN, Pin.PULL_UP)
         self.last_button = 1
 
     def run_main_menu(self):
