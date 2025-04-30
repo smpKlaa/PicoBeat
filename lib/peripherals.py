@@ -17,7 +17,7 @@ class RotaryEncoder:
     flip(bool: False):  Boolean for flipping the direction of the rotary encoder.
     scroll_speed(int): How many actions before scroll event happens. Bigger is slower.
     """
-    def __init__(self, rot_a, rot_b, flip=None, scroll_speed=None):
+    def __init__(self, rot_a, rot_b, button=None, flip=None, scroll_speed=None):
         self.scroll_direction = 1		# Scrolling direction
         if flip:
             # If flip is true, scrolling direction is reversed
@@ -25,10 +25,6 @@ class RotaryEncoder:
         
         if not scroll_speed:
             scroll_speed = 1 
-#         if not rot_a:
-#             rot_a = 10
-#         if not rot_b:
-#             rot_b = 11
           
         self.a = Pin(rot_a, mode = Pin.IN)
         self.b = Pin(rot_b, mode = Pin.IN)
@@ -36,6 +32,17 @@ class RotaryEncoder:
         self.scroll_speed = scroll_speed
         self.fifo = Fifo(30, typecode = 'i')
         self.a.irq(handler = self.handler, trigger = Pin.IRQ_RISING, hard = True)
+        
+        self.has_button = button is not None
+        if self.has_button:
+            self.button = Pin(button, Pin.IN, Pin.PULL_UP)
+            self.has_button = True
+            self.last_button_state = 1
+            self._press_time = None
+            self._held_triggered = False
+            self.hold_time_ms = 1000
+        else:
+            self.has_button = False
         
     def handler(self, pin):
         if self.b():
@@ -54,6 +61,36 @@ class RotaryEncoder:
         if self.fifo.has_data():
             return self.fifo.get()
 
+    def check_button_event(self):
+        if not self.has_button:
+            return None
+
+        current_time = time.ticks_ms()
+        current_state = self.button.value()
+
+    # Button just pressed
+        if current_state == 0 and self.last_button_state == 1:
+            self._press_time = current_time
+            self._held_triggered = False
+
+    # Button held down
+        if current_state == 0 and self._press_time is not None:
+            if not self._held_triggered and time.ticks_diff(current_time, self._press_time) > self.hold_time_ms:
+                self._held_triggered = True
+                self.last_button_state = 0
+                return "long"
+
+    # Button just released
+        if current_state == 1 and self.last_button_state == 0:
+            self.last_button_state = 1
+            if not self._held_triggered:
+                return "short"
+            else:
+                self._press_time = None
+                self._held_triggered = False
+
+        self.last_button_state = current_state
+        return None
 
 class IRS_ADC:
     """

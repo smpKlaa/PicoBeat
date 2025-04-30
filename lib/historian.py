@@ -10,15 +10,17 @@ class Historian:
         self.load_history()
 
     def create_history(self):
+        # Create empty history file if it doesn't exist
         try:
-            with open(self.filename, "x") as f:  # Create only if it doesn't exist
-                pass  # Just create an empty file
+            with open(self.filename, "x") as f:
+                pass
         except FileExistsError:
-            pass  # File already exists — do nothing
+            pass
         except Exception as e:
             print("Error creating history file:", e)
 
     def load_history(self):
+        # Load saved measurements from file
         self.saved_measurements = []
         try:
             with open(self.filename, "r") as f:
@@ -28,18 +30,12 @@ class Historian:
         except Exception:
             self.saved_measurements = []
             self.create_history()
-        #load from newest to oldest
+        
+        # Sort from newest to oldest
         self.saved_measurements.sort(key=lambda x: x["time"], reverse=True)
 
     def add_measurement(self, measurement):
-    # Ensure file exists
-        try:
-            with open(self.filename, "r"):
-                pass
-        except OSError:
-            self.create_history()
-
-        # Append to file
+        # Append new measurement to history file and reload
         try:
             with open(self.filename, "a") as f:
                 json.dump(measurement, f)
@@ -47,18 +43,17 @@ class Historian:
         except Exception as e:
             print("Error appending to history:", e)
 
-        # ✅ Refresh in-memory list from file
         self.load_history()
 
-        # Trim to max entries
         if len(self.saved_measurements) > self.max_entries:
             self.saved_measurements = self.saved_measurements[-self.max_entries:]
 
     def run_menu(self, menu_manager):
+        # Display the measurement history menu
         self.load_history()
         oled = menu_manager.oled
         encoder = menu_manager.encoder
-        button = menu_manager.button
+        print("Event from encoder:", encoder.check_button_event())
 
         if not self.saved_measurements:
             oled.fill(0)
@@ -70,18 +65,18 @@ class Historian:
         selected = 0
 
         def draw_measurement_list():
+            # Draw scrolling list of saved HRV measurements
             total = len(self.saved_measurements)
             oled.fill(0)
             oled.text("HRV Records:", 2, 0)
 
-            # Determine start index to scroll
             start = max(0, selected - 1)
             end = min(start + 4, total)
 
             for i, index in enumerate(range(start, end)):
                 ts = time.localtime(self.saved_measurements[index]["time"])
                 label = "{:02d}:{:02d}, {:02d}/{:02d}/{:02d}".format(
-                    ts[3], ts[4], ts[2], ts[1], ts[0] % 100)  # ts[0] % 100 gives 2-digit year
+                    ts[3], ts[4], ts[2], ts[1], ts[0] % 100)
                 y = (i + 1) * 12
                 if index == selected:
                     oled.fill_rect(0, y, 128, 12, 1)
@@ -92,13 +87,10 @@ class Historian:
 
         draw_measurement_list()
 
+        # Delay to prevent accidental misclick
         time.sleep(0.5)
-        while button.value() == 0:
+        while encoder.check_button_event() is not None:
             time.sleep(0.01)
-
-        last_button = 1
-        button_pressed_time = None
-        held_long_enough = False
 
         while True:
             move = encoder.get()
@@ -110,57 +102,32 @@ class Historian:
                     selected = (selected - 1) % len(self.saved_measurements)
                     draw_measurement_list()
 
-            button_state = button.value()
+            event = encoder.check_button_event()
+            
+            if event == "short":
+                self.view_details(oled, self.saved_measurements[selected], encoder)
+                draw_measurement_list()
+            elif event == "long":
+                return  # Go back to main menu
 
-            if button_state == 0:  # Button is pressed
-                if button_pressed_time is None:
-                    button_pressed_time = time.ticks_ms()
-                elif time.ticks_diff(time.ticks_ms(), button_pressed_time) >= 1000:
-                    held_long_enough = True
-            else:  # Button is released
-                if button_pressed_time is not None:
-                    # On release, decide what to do
-                    if held_long_enough:
-                        return  # Exit to main menu
-                    else:
-                        self.view_details(oled, self.saved_measurements[selected], button)
-                        draw_measurement_list()
-                    # Reset timing
-                    button_pressed_time = None
-                    held_long_enough = False
-
-            last_button = button_state
             time.sleep(0.01)
 
-    def view_details(self, oled, measurement, button):
+    def view_details(self, oled, measurement, encoder):
+        # Display a single HRV measurement's details
         oled.fill(0)
         ts = time.localtime(measurement['time'])
 
-        # Format: HH:MM  DD/MM/YYYY
         oled.text("{:02d}:{:02d} {:02d}/{:02d}/{:04d}".format(
             ts[3], ts[4], ts[2], ts[1], ts[0]), 0, 0)
-
         oled.text(f"HR: {measurement['mean_hr']} bpm", 0, 12)
         oled.text(f"PPI: {measurement['mean_ppi']} ms", 0, 24)
         oled.text(f"RMSSD: {measurement['rmssd']} ms", 0, 36)
         oled.text(f"SDNN: {measurement['sdnn']} ms", 0, 48)
-
         oled.show()
 
-        button_pressed_time = None
-        held_long_enough = False
-
+        # Wait until long hold to exit back to list
         while True:
-            if button.value() == 0:  # Button is pressed
-                if button_pressed_time is None:
-                    button_pressed_time = time.ticks_ms()
-                elif time.ticks_diff(time.ticks_ms(), button_pressed_time) >= 1000:
-                    held_long_enough = True
-            else:  # Button is released
-                if held_long_enough:
-                    return  # Exit only after release, and if held long enough
-                else:
-                    button_pressed_time = None  # Reset if not held long enough
-
+            event = encoder.check_button_event()
+            if event == "long":
+                return
             time.sleep(0.01)
-

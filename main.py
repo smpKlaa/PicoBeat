@@ -34,7 +34,7 @@ class Main:
         introtext.draw_splash_screen()
         
         # Initialize rotary encoder object
-        self.re = RotaryEncoder(10, 11, scroll_speed=3)
+        self.re = RotaryEncoder(10, 11, 12, scroll_speed=3)
         
         # Initialize HR algorithm object
         self.hra = HRA(display=self.OLED)

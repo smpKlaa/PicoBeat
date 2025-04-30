@@ -16,7 +16,7 @@ class MenuManager:
         # Draw and run the main menu. Return selected choice
         menu_items = [
             "Measure HR",
-            "Basic HRV Analysis",
+            "HRV Analysis",
             "Kubios",
             "History"
         ]
