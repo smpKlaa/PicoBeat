@@ -5,6 +5,7 @@ import ssd1306
 import time
 import math
 import ntptime
+import historian
 
 # OLED Display Setup
 i2c = I2C(1, sda=Pin(14), scl=Pin(15), freq=400000)
@@ -64,12 +65,13 @@ def display_results(results):
     
     oled.show()
 
-def analyze_and_display(peaks):
+def analyze_and_display(peaks, historian_instance):
     global button
     # Calculate HRV metrics
     results = calculate_hrv(peaks)
     
     if results:
+        historian_instance.add_measurement(results)
         display_results(results)
         
         # Print to console for debugging
@@ -92,4 +94,4 @@ def analyze_and_display(peaks):
 
 
 if __name__ == "__main__":
-    analyze_and_display()
+    analyze_and_display(peaks)

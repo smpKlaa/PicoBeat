@@ -73,7 +73,7 @@ class Main:
     def measure_hr_1(self):
         peaks = self.hra.start_recording(mode=1)
 #         print("PEAKS:", peaks)
-        WIP_HRV.analyze_and_display(peaks)
+        WIP_HRV.analyze_and_display(peaks, self.historian)
         self.change_state(self.mainmenu)
         
     def measure_hr_2(self):
@@ -85,6 +85,7 @@ class Main:
     
     def history(self):
         self.historian.run_menu(self.menu)
+        self.change_state(self.mainmenu)
 
         
 if __name__ == "__main__":
