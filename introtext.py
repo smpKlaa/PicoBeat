@@ -234,6 +234,3 @@ def draw_splash_screen():
     oled.fill(0)
     oled.text(f"Feel the Beat", 10, 30)
     oled.show()
-    time.sleep(1)
-    oled.fill(0)
-    oled.show()

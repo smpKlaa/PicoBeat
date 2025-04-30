@@ -4,14 +4,16 @@ from historian import Historian
 from networker import Networker
 from hr_algo import HRA
 from peripherals import RotaryEncoder
+import time
+import json
 import ssd1306
 import mip
 import WIP_HRV
 import introtext
 
-SSID = ""
-PASSWORD = ""
-BROKER_IP = ""
+SSID = "KMD657_Group_6"
+PASSWORD = "Group0110"
+BROKER_IP = "192.168.6.253"
 
 SDA_PIN = 14
 SCL_PIN = 15
@@ -43,10 +45,11 @@ class Main:
         # Connect to network and subscribe to MQTT
         self.net.connect_wifi()
 #         self.net.install_mqtt()
-        self.net.connect_mqtt("PicoBeat", "kubios-response", self.hra.kubios_response)
+        self.net.connect_mqtt("PicoBeat", "kubios-response", self.kubios_response)
         
         self.state = self.mainmenu
         self.previous_state = None
+        self.message_received = False
     
     def execute(self):
         self.state()
@@ -77,15 +80,34 @@ class Main:
         self.change_state(self.mainmenu)
         
     def measure_hr_2(self):
-        # Dummy
         peaks = self.hra.start_recording(mode=2)
-#         print("PEAKS:", peaks)
-#         WIP_HRV.analyze_and_display(peaks)
-        self.change_state(self.mainmenu)
+        if not peaks:
+            self.change_state(self.mainmenu)
+        
+        print("PEAKS:", peaks)
+        
+        payload = {
+            "id": time.time(),
+            "type": "RRI",
+            "data": peaks,
+            "analysis": {
+                "type": "readiness"
+                }
+            }
+
+        self.net.publish("kubios-request", json.dumps(payload))
+        self.net.wait_for_message()
+
     
     def history(self):
         self.historian.run_menu(self.menu)
         self.change_state(self.mainmenu)
+        
+    def kubios_response(self, topic, response):
+#         self.message_received = True
+        self.historian.add_measurement(response)
+        print("Kubios results saved")
+        
 
         
 if __name__ == "__main__":

@@ -162,7 +162,14 @@ class HRA:
                 if self.mode == 1 or self.mode == 2:
                     self.OLED.fill_rect(0, 60, int(127 * progress), 3, 1)
                 self.OLED.show()
-            
+        
+#         if (self.mode != 0):
+        if (self.mode != 0) and (not self.measurement_ready):
+            self.OLED.fill(0)
+            self.OLED.text("Not enough data", 10, 24, 1)
+            self.OLED.show()
+            time.sleep(2)
+            return None
         return self.peaks
 
 
