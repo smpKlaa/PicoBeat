@@ -75,6 +75,10 @@ class IRS_ADC:
         """get just calls the internal fifo's method."""
         return self.fifo.get()
     
+    def reset_fifo(self):
+        """Empty fifo"""
+        self.fifo = Fifo(50)
+    
     def has_data(self):
         """has_data just calls the internal fifo's method."""
         return self.fifo.has_data()

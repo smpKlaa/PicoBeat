@@ -44,6 +44,33 @@ class HRA:
         self.rot_button = Pin(12, mode = Pin.IN, pull = Pin.PULL_UP)
 
         # Algorithm vars -------------------------------------------------------
+#         self.max_value = None							# Max value of current peak
+#         self.sample_n = 0								# Total amount of samples
+#         self.peaks = []									# All recorded peaks
+#         self.last_samples_avg_10 = RollAvg(size=10)		# Rolling average of last 10 samples
+#         self.last_samples_avg_40 = RollAvg(size=40)		# Rolling average of last 40 samples
+#         self.last_samples_raw = Filo(250, typecode = "i")# Last 250 raw sample values
+#         self.last_peak = None 							# Last peak timestamp(tick)
+#         self.bpm = 0									# Current BPM
+#         self.lts_min = None								# Last second lowest value
+#         self.lts_max = None								# Last second highest value
+#         self.ppi_roll_avg = RollAvg(size=10)			# Rolling average of last 10 PPI(ms)
+#         self.cur_cooldown = 0							# Time since artifact(ms)
+#         self.last_artifact_timestamp = 0				# Last artifact timestamp(tick)
+#         self.artifact_count = 0							# Total amount of artifacts
+#         self.thread_running = True						# Global flag for stopping 2. thread
+        
+#         self.fill_buffer()
+        
+#     def execute(self):
+#         self._function()
+
+    def start_recording(self, mode=None):
+        self.OLED.fill(0)
+        self.OLED.text("Initializing...", 0, 0, 1)
+        self.OLED.show()
+        
+        # Algorithm vars -------------------------------------------------------
         self.max_value = None							# Max value of current peak
         self.sample_n = 0								# Total amount of samples
         self.peaks = []									# All recorded peaks
@@ -59,16 +86,6 @@ class HRA:
         self.last_artifact_timestamp = 0				# Last artifact timestamp(tick)
         self.artifact_count = 0							# Total amount of artifacts
         self.thread_running = True						# Global flag for stopping 2. thread
-        
-#         self.fill_buffer()
-        
-#     def execute(self):
-#         self._function()
-
-    def start_recording(self, mode=None):
-        self.OLED.fill(0)
-        self.OLED.text("Initializing...", 0, 0, 1)
-        self.OLED.show()
         
         # Set mode to 0 by default
         if not mode or (mode != 1 and mode != 2):
@@ -127,9 +144,12 @@ class HRA:
             return
         
         self.measurement_ready = False
+        btn_pressed = False
         while True:
             # Rotary button stops recording.
             if self.rot_button() == 0:
+                btn_pressed = True
+            if btn_pressed and self.rot_button() == 1:
                 self.stop()
                 break
             if self.last_samples_avg_10.count > 0:
@@ -166,7 +186,7 @@ class HRA:
 #         if (self.mode != 0):
         if (self.mode != 0) and (not self.measurement_ready):
             self.OLED.fill(0)
-            self.OLED.text("Not enough data", 10, 24, 1)
+            self.OLED.text("Not enough data", 5, 24, 1)
             self.OLED.show()
             time.sleep(2)
             return None
@@ -221,11 +241,6 @@ class HRA:
                     self.ppi_avg = self.ppi_roll_avg.update(interval)
                     # Calculate current BPM
                     self.bpm = int(60 / (self.ppi_avg / 1000))
-
-                    
-    def kubios_response(self, response):
-        print(response)
-
 
     # Find min and max values of recent values
     def find_min_max(self):
@@ -292,10 +307,10 @@ class HRA:
         self.sensor_timer.deinit()
         # Stop 2. thread.
         self.thread_running = False
+        # Empty sensor fifo
+        self.sensor.reset_fifo()
 
 
 if __name__ == "__main__":
     hra = HRA()
     hra.start_recording(mode=1)
-
-

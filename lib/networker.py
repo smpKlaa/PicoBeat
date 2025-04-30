@@ -18,18 +18,16 @@ class Networker:
         if not wlan.isconnected():
             print("Connecting to WiFi...")
             wlan.connect(self.ssid, self.password)
-            try:
-                retry = 0
-                while not wlan.isconnected() and retry < 10:
-                    time.sleep(1)
-                    print("Connecting...")
-                    retry += 1
-                if retry >= 10:
-                    raise RuntimeError("Connection timeout")
-            except Exception as e:
-                print("Failed to connect to WiFi: {e}")
+
+            retry = 0
+            while not wlan.isconnected() and retry < 5:
+                time.sleep(1)
+                print("Connecting...")
+                retry += 1
+            if retry >= 5:
+                print("WARNING: Failed to connect to wifi. Offline mode on.")
+                return False
         
-        print("B")
         if wlan.isconnected():
             print("Connected to WiFi. IP:", wlan.ifconfig()[0])
         else:
