@@ -4,6 +4,8 @@ from historian import Historian
 from networker import Networker
 from hr_algo import HRA
 from peripherals import RotaryEncoder
+from led import Led
+from piotimer import Piotimer
 import time
 import json
 import ssd1306
@@ -18,12 +20,21 @@ BROKER_IP = "192.168.6.253"
 SDA_PIN = 14
 SCL_PIN = 15
 
+PW_LED = Led(20)
+WIFI_LED = Led(21)
+        
+PW_LED.on()
+
 class Main:
     def __init__(self):
         self.state = self.mainmenu
         self.previous_state = None
-        
+
         self.net = Networker(SSID, PASSWORD, BROKER_IP)
+        
+        self.wifi_check_timer = Piotimer(mode = Piotimer.PERIODIC,
+                                     freq = 0.25,
+                                     callback = self.wifi_check_callback)
         
         # Initialize I2C pin and channel
         self.i2c = I2C(1, sda=Pin(SDA_PIN), scl=Pin(SCL_PIN), freq=400000)
@@ -51,7 +62,7 @@ class Main:
         
         # Connect to network and subscribe to MQTT
         self.connected_to_wifi = self.net.connect_wifi()
-        if not self.connected_to_wifi:
+        if not self.wifi_check():
             self.display_error("WIFICONN")
         else: 
 #         	self.net.install_mqtt()
@@ -65,6 +76,17 @@ class Main:
     def execute(self): # -------------------------------------------------------
         self.state()
         
+        
+    def wifi_check(self):
+        if self.connected_to_wifi:
+            WIFI_LED.on()
+            return True
+        else:
+            WIFI_LED.off()
+            return False
+        
+    def wifi_check_callback(self, _):
+        self.wifi_check()
         
     def change_state(self, _state): # ------------------------------------------
         self.previous_state = self.state
