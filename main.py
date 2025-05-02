@@ -148,7 +148,11 @@ class Main:
         
         
     def kubios_response(self, topic, response): # ------------------------------
-#         self.message_received = True
+        response = json.loads(response)
+        if response.data == "Invalid request":
+            print("ERROR: Kubios invalid request")
+            self.display_error("INVALIDREQUEST")
+            return
         self.historian.add_measurement(response)
         print("Kubios results saved")
         

@@ -35,7 +35,7 @@ class Historian:
         self.saved_measurements.sort(key=lambda x: x["time"], reverse=True)
             
     def add_measurement(self, measurement):
-        measurement = json.loads(measurement)
+#         measurement = json.loads(measurement)
         # Ensure the measurement has a timestamp
         if not "time" in measurement:
             measurement["time"] = time.time() + 3 * 3600
