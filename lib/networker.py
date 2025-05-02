@@ -38,7 +38,7 @@ class Networker:
     def sync_time(self):
         print("Syncing RTC")
         try:
-            ntptime.settime()
+            ntptime.settime(3)
         except Exception as e:
             print(f"WARNING: Time syncronation failed: {e}")
             return
