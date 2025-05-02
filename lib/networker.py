@@ -42,7 +42,7 @@ class Networker:
 
     def connect_mqtt(self, client_id, sub_topic=None, callback=None):
         # Connect to MQTT broker and subscribe to a topic
-        self.client = MQTTClient(client_id, self.broker_ip, port=1883)
+        self.client = MQTTClient(client_id, self.broker_ip, port=21883)
 
         if callback:
             self.client.set_callback(callback)

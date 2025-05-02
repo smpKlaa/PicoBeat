@@ -4,7 +4,7 @@ from fifo import Fifo
 import ssd1306
 import time
 import math
-import ntptime
+import json
 import historian
 
 # OLED Display Setup
@@ -71,7 +71,7 @@ def analyze_and_display(peaks, historian_instance):
     results = calculate_hrv(peaks)
     
     if results:
-        historian_instance.add_measurement(results)
+        historian_instance.add_measurement(json.dumps(results))
         display_results(results)
         
         # Print to console for debugging

@@ -172,7 +172,7 @@ class HRA:
                 add_to_line(y)
                 
                 # Threshold line for debugging.
-                self.OLED.line(0, 25, 127, 25, 1)
+#                self.OLED.line(0, 25, 127, 25, 1)
                 
                 # Draw graph to screen.
                 for x in range(1, len(line_buffer)):

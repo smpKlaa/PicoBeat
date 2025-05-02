@@ -35,8 +35,9 @@ class Historian:
         self.saved_measurements.sort(key=lambda x: x["time"], reverse=True)
             
     def add_measurement(self, measurement):
+        measurement = json.loads(measurement)
         # Ensure the measurement has a timestamp
-        if "time" not in measurement:
+        if not "time" in measurement:
             measurement["time"] = time.time()
 
         try:
@@ -76,11 +77,11 @@ class Historian:
             start = max(0, selected - 1)
             end = min(start + 4, total)
 
-            for i, index in enumerate(range(start, end)):
+            for index in range(start, end):
                 ts = time.localtime(self.saved_measurements[index]["time"])
                 label = "{:02d}:{:02d}, {:02d}/{:02d}/{:02d}".format(
                     ts[3], ts[4], ts[2], ts[1], ts[0] % 100)
-                y = (i + 1) * 12
+                y = (index + 1) * 12
                 if index == selected:
                     oled.fill_rect(0, y, 128, 12, 1)
                     oled.text(label, 2, y + 2, 0)
@@ -127,7 +128,6 @@ class Historian:
                 ("PPI", f"{round(analysis['mean_rr_ms'])} ms"),
                 ("Age", f"{analysis['physiological_age']}"),
                 ("PNS", f"{analysis['pns_index']:.2f}"),
-                ("RR", f"{analysis['respiratory_rate'] or 'N/A'}"),
                 ("RMSSD", f"{round(analysis['rmssd_ms'])} ms"),
                 ("SD1", f"{round(analysis['sd1_ms'])} ms"),
                 ("SD2", f"{round(analysis['sd2_ms'])} ms"),
