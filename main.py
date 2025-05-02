@@ -150,7 +150,7 @@ class Main:
         
     def kubios_response(self, topic, response): # ------------------------------
         response = json.loads(response)
-        if response.data == "Invalid request":
+        if response["data"] == "Invalid request":
             print("ERROR: Kubios invalid request")
             self.display_error("INVALIDREQUEST")
             return
