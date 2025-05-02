@@ -33,9 +33,12 @@ class Historian:
         
         # Sort from newest to oldest
         self.saved_measurements.sort(key=lambda x: x["time"], reverse=True)
-
+            
     def add_measurement(self, measurement):
-        # Append new measurement to history file and reload
+        # Ensure the measurement has a timestamp
+        if "time" not in measurement:
+            measurement["time"] = time.time()
+
         try:
             with open(self.filename, "a") as f:
                 json.dump(measurement, f)
@@ -119,7 +122,7 @@ class Historian:
         if is_kubios:
             analysis = measurement["data"]["analysis"]
             details = [
-                ("Kubios", ""),
+                ("Type", "Kubios"),
                 ("HR", f"{round(analysis['mean_hr_bpm'])} bpm"),
                 ("PPI", f"{round(analysis['mean_rr_ms'])} ms"),
                 ("Age", f"{analysis['physiological_age']}"),
@@ -134,13 +137,12 @@ class Historian:
             ]
         else:
             details = [
-        ("Type", "Basic HRV"),
-        ("HR", f"{measurement['mean_hr']} bpm"),
-        ("PPI", f"{measurement['mean_ppi']} ms"),
-        ("RMSSD", f"{measurement['rmssd']} ms"),
-        ("SDNN", f"{measurement['sdnn']} ms")
-    ]
-
+                ("Type", "Basic"),
+                ("HR", f"{measurement['mean_hr']} bpm"),
+                ("PPI", f"{measurement['mean_ppi']} ms"),
+                ("RMSSD", f"{measurement['rmssd']} ms"),
+                ("SDNN", f"{measurement['sdnn']} ms")
+            ]
 
         selected = 0
         total = len(details)
