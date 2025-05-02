@@ -113,21 +113,72 @@ class Historian:
             time.sleep(0.01)
 
     def view_details(self, oled, measurement, encoder):
-        # Display a single HRV measurement's details
-        oled.fill(0)
-        ts = time.localtime(measurement['time'])
+        # Determine if this is a Kubios (long) measurement
+        is_kubios = "data" in measurement
 
-        oled.text("{:02d}:{:02d} {:02d}/{:02d}/{:04d}".format(
-            ts[3], ts[4], ts[2], ts[1], ts[0]), 0, 0)
-        oled.text(f"HR: {measurement['mean_hr']} bpm", 0, 12)
-        oled.text(f"PPI: {measurement['mean_ppi']} ms", 0, 24)
-        oled.text(f"RMSSD: {measurement['rmssd']} ms", 0, 36)
-        oled.text(f"SDNN: {measurement['sdnn']} ms", 0, 48)
-        oled.show()
+        if is_kubios:
+            analysis = measurement["data"]["analysis"]
+            details = [
+                ("Kubios", ""),
+                ("HR", f"{round(analysis['mean_hr_bpm'])} bpm"),
+                ("PPI", f"{round(analysis['mean_rr_ms'])} ms"),
+                ("Age", f"{analysis['physiological_age']}"),
+                ("PNS", f"{analysis['pns_index']:.2f}"),
+                ("RR", f"{analysis['respiratory_rate'] or 'N/A'}"),
+                ("RMSSD", f"{round(analysis['rmssd_ms'])} ms"),
+                ("SD1", f"{round(analysis['sd1_ms'])} ms"),
+                ("SD2", f"{round(analysis['sd2_ms'])} ms"),
+                ("SDNN", f"{round(analysis['sdnn_ms'])} ms"),
+                ("SNS", f"{analysis['sns_index']:.2f}"),
+                ("Stress", f"{round(analysis['stress_index'])}")
+            ]
+        else:
+            details = [
+        ("Type", "Basic HRV"),
+        ("HR", f"{measurement['mean_hr']} bpm"),
+        ("PPI", f"{measurement['mean_ppi']} ms"),
+        ("RMSSD", f"{measurement['rmssd']} ms"),
+        ("SDNN", f"{measurement['sdnn']} ms")
+    ]
 
-        # Wait until long hold to exit back to list
+
+        selected = 0
+        total = len(details)
+
+        def draw_detail_screen():
+            oled.fill(0)
+            ts = time.localtime(measurement['time'])
+            oled.text("{:02d}:{:02d} {:02d}/{:02d}/{:04d}".format(
+                ts[3], ts[4], ts[2], ts[1], ts[0]), 0, 0)
+
+            for i in range(3):  # Show 3 lines at a time
+                index = selected + i
+                if index >= total:
+                    break
+                label, value = details[index]
+                y = 16 + (i * 16)
+                if i == 0:
+                    oled.fill_rect(0, y, 128, 16, 1)
+                    oled.text(f"{label}: {value}", 2, y + 4, 0)
+                else:
+                    oled.text(f"{label}: {value}", 2, y + 4, 1)
+
+            oled.show()
+
+        draw_detail_screen()
+
+        # Wait for long press to return
         while True:
+            move = encoder.get()
+            if move == 1 and selected < total - 1:
+                selected += 1
+                draw_detail_screen()
+            elif move == -1 and selected > 0:
+                selected -= 1
+                draw_detail_screen()
+
             event = encoder.check_button_event()
             if event == "long":
                 return
+
             time.sleep(0.01)
