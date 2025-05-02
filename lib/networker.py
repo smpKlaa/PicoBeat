@@ -30,6 +30,7 @@ class Networker:
         
         if wlan.isconnected():
             print("Connected to WiFi. IP:", wlan.ifconfig()[0])
+            return True
         else:
             raise RuntimeError("Failed to connect to WiFi")
 
