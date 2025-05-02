@@ -40,7 +40,7 @@ def calculate_hrv(peaks):
     rmssd = math.sqrt(sum(squared_diffs)/len(squared_diffs)) if len(diffs) >=1 else 0
     
     # Timestamp. Not displayed on Oled due to space concerns
-    timestamp = time.time()
+    timestamp = time.time() + 3 * 3600
     
     return {
         "analysis_type": "basic",

@@ -38,7 +38,7 @@ class Historian:
         measurement = json.loads(measurement)
         # Ensure the measurement has a timestamp
         if not "time" in measurement:
-            measurement["time"] = time.time()
+            measurement["time"] = time.time() + 3 * 3600
 
         try:
             with open(self.filename, "a") as f:

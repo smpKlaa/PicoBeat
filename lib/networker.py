@@ -38,11 +38,11 @@ class Networker:
     def sync_time(self):
         print("Syncing RTC")
         try:
-            ntptime.settime(3)
+            ntptime.settime()
         except Exception as e:
             print(f"WARNING: Time syncronation failed: {e}")
             return
-        print(f"Time syncronation successful. {time.localtime(time.time())}")
+        print(f"Time syncronation successful. {time.localtime()}")
 
     def install_mqtt(self):
         try:
