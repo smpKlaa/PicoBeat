@@ -1,6 +1,7 @@
 import network
 import time
 import mip
+import ntptime
 from umqtt.simple import MQTTClient
 
 class Networker:
@@ -33,6 +34,15 @@ class Networker:
             return True
         else:
             raise RuntimeError("Failed to connect to WiFi")
+        
+    def sync_time(self):
+        print("Syncing RTC")
+        try:
+            ntptime.settime()
+        except Exception as e:
+            print(f"WARNING: Time syncronation failed: {e}")
+            return
+        print(f"Time syncronation successful. {time.localtime(time.time())}")
 
     def install_mqtt(self):
         try:

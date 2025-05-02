@@ -55,6 +55,7 @@ class Main:
             self.display_error("WIFICONN")
         else: 
 #         	self.net.install_mqtt()
+            self.net.sync_time()
             self.net.connect_mqtt("PicoBeat",
                                   "kubios-response",
                                   self.kubios_response)
