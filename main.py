@@ -78,6 +78,7 @@ class Main:
         
         
     def wifi_check(self):
+        self.connected_to_wifi = self.net.wifi_connected()
         if self.connected_to_wifi:
             WIFI_LED.on()
             return True

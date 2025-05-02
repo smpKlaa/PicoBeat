@@ -14,26 +14,35 @@ class Networker:
 
     def connect_wifi(self):
         # Connect to WiFi network
-        wlan = network.WLAN(network.STA_IF)
-        wlan.active(True)
-        if not wlan.isconnected():
+        self.wlan = network.WLAN(network.STA_IF)
+        self.wlan.active(True)
+        if not self.wlan.isconnected():
             print("Connecting to WiFi...")
-            wlan.connect(self.ssid, self.password)
+            self.wlan.connect(self.ssid, self.password)
 
             retry = 0
-            while not wlan.isconnected() and retry < 10:
+            while not self.wlan.isconnected() and retry < 5:
                 time.sleep(1)
                 print("Connecting...")
                 retry += 1
-            if retry >= 10:
+            if retry >= 5:
                 print("WARNING: Failed to connect to wifi. Offline mode on.")
                 return False
         
-        if wlan.isconnected():
-            print("Connected to WiFi. IP:", wlan.ifconfig()[0])
+        if self.wlan.isconnected():
+            print("Connected to WiFi. IP:", self.wlan.ifconfig()[0])
             return True
         else:
             raise RuntimeError("Failed to connect to WiFi")
+        
+    def wifi_connected(self):
+        if self.wlan:
+            if self.wlan.isconnected():
+                return True
+            else:
+                return False
+        else:
+            return False
         
     def sync_time(self):
         print("Syncing RTC")
