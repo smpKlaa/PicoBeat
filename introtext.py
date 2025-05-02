@@ -195,7 +195,7 @@ def draw_small_heart(x, y):
                 oled.pixel(x + col, y + row, 1)
                         
 heart_x = 48
-heart_y = 30
+heart_y = 25
 
 # List of all bitmaps and heart
 bitmaps = [P_bitmap, I_bitmap, C_bitmap, "heart", B_bitmap, E_bitmap, A_bitmap, T_bitmap]
@@ -207,9 +207,9 @@ def draw_splash_screen():
 
     for bmp in bitmaps:
         if bmp == "heart":
-            draw_heart(x_start, 30)
+            draw_heart(x_start, 25)
         else:
-            draw_bitmap(x_start, 30, bmp)
+            draw_bitmap(x_start, 25, bmp)
         oled.show()
         time.sleep(0.1)  # Wait 0.1 seconds between letters
         x_start += 16  # Move X position for next character
@@ -223,7 +223,7 @@ def draw_splash_screen():
         oled.show()
         time.sleep(0.2)
 
-        # Grow back: clear small heart and draw big heart
+        # Grow back: clear small heart and draw big heart 
         oled.fill_rect(heart_x, heart_y, 16, 16, 0)
         draw_heart(heart_x, heart_y)
         oled.show()
@@ -234,3 +234,5 @@ def draw_splash_screen():
     oled.fill(0)
     oled.text(f"Feel the Beat", 10, 30)
     oled.show()
+
+draw_splash_screen()
