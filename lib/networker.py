@@ -21,11 +21,11 @@ class Networker:
             wlan.connect(self.ssid, self.password)
 
             retry = 0
-            while not wlan.isconnected() and retry < 5:
+            while not wlan.isconnected() and retry < 10:
                 time.sleep(1)
                 print("Connecting...")
                 retry += 1
-            if retry >= 5:
+            if retry >= 10:
                 print("WARNING: Failed to connect to wifi. Offline mode on.")
                 return False
         
