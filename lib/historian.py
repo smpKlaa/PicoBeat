@@ -77,11 +77,11 @@ class Historian:
             start = max(0, selected - 1)
             end = min(start + 4, total)
 
-            for index in range(start, end):
+            for i, index in enumerate(range(start, end)):
                 ts = time.localtime(self.saved_measurements[index]["time"])
                 label = "{:02d}:{:02d}, {:02d}/{:02d}/{:02d}".format(
                     ts[3], ts[4], ts[2], ts[1], ts[0] % 100)
-                y = (index + 1) * 12
+                y = (i + 1) * 12
                 if index == selected:
                     oled.fill_rect(0, y, 128, 12, 1)
                     oled.text(label, 2, y + 2, 0)
