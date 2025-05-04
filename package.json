@@ -15,7 +15,8 @@
   	["hr_algo.py", "http://localhost:8000/hr_algo.py"],
     ["introtext.py", "http://localhost:8000/introtext.py"],
     ["WIP_HRV.py", "http://localhost:8000/WIP_HRV.py"],
-    ["main.py", "http://localhost:8000/main.py"]
+    ["main.py", "http://localhost:8000/main.py"],
+    ["menuicons.py", "http://localhost:8000/menuicons.py"]
   ],
   "deps": [
   ],
