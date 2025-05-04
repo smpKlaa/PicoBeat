@@ -1,5 +1,7 @@
 import time
 from machine import Pin
+import menuicons as icons
+import framebuf
 
 class MenuManager:
     BUTTON_PIN = 12
@@ -83,13 +85,28 @@ class MenuManager:
         time.sleep(2)
 
     def _draw_menu(self, items, selected):
-        # Draw the menu screen
         self.oled.fill(0)
+
+    # Icon list must match menu items
+        icon_map = [
+            icons.heart_icon,
+            icons.chart_icon,
+            icons.kubios_icon,
+            icons.history_icon
+        ]
+
         for i, item in enumerate(items):
             y = i * 16
+
+            # Only blit icon if it exists
+            if i < len(icon_map):
+                self.oled.blit(icon_map[i], 0, y)
+
+            # Draw selection highlight and text
             if i == selected:
-                self.oled.fill_rect(0, y, 128, 16, 1)
-                self.oled.text(item, 2, y + 4, 0)  # Invert text
+                self.oled.fill_rect(18, y, 110, 16, 1)
+                self.oled.text(item, 20, y + 4, 0)
             else:
-                self.oled.text(item, 2, y + 4, 1)  # Normal text
+                self.oled.text(item, 20, y + 4, 1)
+
         self.oled.show()
