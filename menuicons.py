@@ -2,84 +2,52 @@ import framebuf
 
 # Bytearrays of the menu icons
 
+# Icon for the Measure HR option
+heart_width = 16
+heart_height = 16
 heart_icon_data = bytearray([
-    0b00011000, 0b01100000,
-    0b00111100, 0b11110000, 
-    0b01111111, 0b11111000,
-    0b11111111, 0b11111100, 
-    0b11111111, 0b11111100, 
-    0b11111111, 0b11111100, 
-    0b01111111, 0b11111000, 
-    0b00111111, 0b11110000, 
-    0b00011111, 0b11100000, 
-    0b00001111, 0b11000000, 
-    0b00000111, 0b10000000, 
-    0b00000011, 0b00000000, 
-    0b00000000, 0b00000000, 
-    0b00000000, 0b00000000, 
-    0b00000000, 0b00000000, 
-    0b00000000, 0b00000000, 
+    #// font edit begin : monohmsb : 16 : 16 : 16
+    0x38, 0x1c, 0x7c, 0x3e, 0xfe, 0x7f, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfe, 0x7f, 0xfc, 0x3f,
+    0xf8, 0x1f, 0xf0, 0x0f, 0xe0, 0x07, 0x80, 0x01 
+    #// font edit end
 ])
 
+# Icon for the HRV Analysis option
+hrv_width = 16
+hrv_height = 16
 chart_icon_data = bytearray([
-    0b01111000, 0b00000000,
-    0b01001000, 0b00000000,
-    0b01001000, 0b00000000,
-    0b01001011, 0b11000000,
-    0b01001010, 0b01000000,
-    0b01001010, 0b01000000,
-    0b01001010, 0b01000000,
-    0b01001010, 0b01011110,
-    0b01001010, 0b01010010,
-    0b01001010, 0b01010010,
-    0b01001010, 0b01010010,
-    0b01001010, 0b01010010,
-    0b01111011, 0b11011110,
-    0b00000000, 0b00000000,
-    0b11111111, 0b11111111,
-    0b00000000, 0b00000000,
+    #// font edit begin : monohmsb : 16 : 16 : 16
+    0x00, 0x78, 0x00, 0x48, 0x00, 0x48, 0x00, 0x48, 0xc0, 0x4b, 0x40, 0x4a,
+    0x40, 0x4a, 0x40, 0x4a, 0x5e, 0x4a, 0x52, 0x4a, 0x52, 0x4a, 0x52, 0x4a,
+    0x52, 0x4a, 0xde, 0x7b, 0x00, 0x00, 0xff, 0xff 
+    #// font edit end
 ])
 
+# Icon for the Kubios option
+kubios_width = 16
+kubios_height = 16
 kubios_icon_data = bytearray([
-    0b00000000, 0b00000000,
-    0b00000000, 0b00000000,
-    0b00000011, 0b11000000,
-    0b00000100, 0b00100000,
-    0b00001000, 0b00010000,
-    0b00001000, 0b00010000,
-    0b00011100, 0b00111000,
-    0b01000000, 0b00000010,
-    0b10000000, 0b00000001,
-    0b10000000, 0b00000001,
-    0b10000000, 0b00000001,
-    0b10000000, 0b00000001,
-    0b01000000, 0b00000010,
-    0b00111111, 0b11111100,
-    0b00000000, 0b00000000,
-    0b00000000, 0b00000000,
+    #// font edit begin : monohmsb : 16 : 16 : 16
+    0x00, 0x00, 0xc0, 0x03, 0x20, 0x04, 0x10, 0x08, 0x10, 0x08, 0x1c, 0x38,
+    0x22, 0x44, 0x01, 0x80, 0x01, 0x80, 0x01, 0x80, 0x01, 0x80, 0x01, 0x80,
+    0x02, 0x40, 0xfc, 0x3f, 0x00, 0x00, 0x00, 0x00 
+    #// font edit end
 ])
 
+# Icon for the History option
+history_width = 16
+history_height = 16
 history_icon_data = bytearray([
-    0b00001111, 0b11110000,
-    0b00011000, 0b00011000,
-    0b00110001, 0b10001100,
-    0b01100001, 0b10000110,
-    0b11000001, 0b10000011,
-    0b10000001, 0b10000001,
-    0b10000001, 0b10000001,
-    0b10000001, 0b11110001,
-    0b10000001, 0b11110001,
-    0b10000000, 0b00000001,
-    0b10000000, 0b00000001,
-    0b11000000, 0b00000011,
-    0b01100000, 0b00000110,
-    0b00110000, 0b00001100,
-    0b00011000, 0b00011000,
-    0b00001111, 0b11110000,
+    #// font edit begin : monohmsb : 16 : 16 : 16
+    0xf0, 0x0f, 0x18, 0x18, 0x8c, 0x31, 0x86, 0x61, 0x83, 0xc1, 0x81, 0x81,
+    0x81, 0x81, 0xf1, 0x81, 0xf1, 0x81, 0x01, 0x80, 0x01, 0x80, 0x03, 0xc0,
+    0x06, 0x60, 0x0c, 0x30, 0x18, 0x18, 0xf0, 0x0f 
+    #// font edit end
 ])
 
 # Create 16x16 framebuffers for each icon
-heart_icon   = framebuf.FrameBuffer(heart_icon_data, 16, 16, framebuf.MONO_HLSB)
-chart_icon   = framebuf.FrameBuffer(chart_icon_data, 16, 16, framebuf.MONO_HLSB)
-kubios_icon  = framebuf.FrameBuffer(kubios_icon_data, 16, 16, framebuf.MONO_HLSB)
-history_icon = framebuf.FrameBuffer(history_icon_data, 16, 16, framebuf.MONO_HLSB)
+heart_icon   = framebuf.FrameBuffer(heart_icon_data, 16, 16, framebuf.MONO_HMSB)
+chart_icon   = framebuf.FrameBuffer(chart_icon_data, 16, 16, framebuf.MONO_HMSB)
+kubios_icon  = framebuf.FrameBuffer(kubios_icon_data, 16, 16, framebuf.MONO_HMSB)
+history_icon = framebuf.FrameBuffer(history_icon_data, 16, 16, framebuf.MONO_HMSB)
