@@ -30,11 +30,13 @@ class Historian:
         except Exception:
             self.saved_measurements = []
             self.create_history()
+            # If file doesn't exist or can't be read, create a new one
         
         # Sort from newest to oldest
         self.saved_measurements.sort(key=lambda x: x["time"], reverse=True)
             
     def add_measurement(self, measurement):
+         # Add a new measurement to the file and reload history
 #         measurement = json.loads(measurement)
         # Ensure the measurement has a timestamp
         if not "time" in measurement:
@@ -49,6 +51,7 @@ class Historian:
 
         self.load_history()
 
+         # Keep only the most recent max_entries
         if len(self.saved_measurements) > self.max_entries:
             self.saved_measurements = self.saved_measurements[-self.max_entries:]
 
@@ -96,9 +99,11 @@ class Historian:
         while encoder.check_button_event() is not None:
             time.sleep(0.01)
 
+        # Main interaction loop
         while True:
             move = encoder.get()
             if move is not None:
+                # Scroll through entries
                 if move == 1:
                     selected = (selected + 1) % len(self.saved_measurements)
                     draw_measurement_list()
@@ -109,6 +114,7 @@ class Historian:
             event = encoder.check_button_event()
             
             if event == "short":
+                # Show detailed view for selected measurement
                 self.view_details(oled, self.saved_measurements[selected], encoder)
                 draw_measurement_list()
             elif event == "long":
@@ -117,6 +123,8 @@ class Historian:
             time.sleep(0.01)
 
     def view_details(self, oled, measurement, encoder):
+        # Display detailed HRV metrics for a selected measurement
+
         # Determine if this is a Kubios (long) measurement
         is_kubios = "data" in measurement
 
@@ -136,6 +144,7 @@ class Historian:
                 ("Stress", f"{round(analysis['stress_index'])}")
             ]
         else:
+            # Basic analysis
             details = [
                 ("Type", "Basic"),
                 ("HR", f"{measurement['mean_hr']} bpm"),
@@ -153,13 +162,14 @@ class Historian:
             oled.text("{:02d}:{:02d} {:02d}/{:02d}/{:04d}".format(
                 ts[3], ts[4], ts[2], ts[1], ts[0]), 0, 0)
 
-            for i in range(3):  # Show 3 lines at a time
+            for i in range(3):
                 index = selected + i
                 if index >= total:
                     break
                 label, value = details[index]
                 y = 16 + (i * 16)
                 if i == 0:
+                    # Highlight selected
                     oled.fill_rect(0, y, 128, 16, 1)
                     oled.text(f"{label}: {value}", 2, y + 4, 0)
                 else:
@@ -169,7 +179,7 @@ class Historian:
 
         draw_detail_screen()
 
-        # Wait for long press to return
+        # Interaction loop for scrolling through detail lines
         while True:
             move = encoder.get()
             if move == 1 and selected < total - 1:
@@ -181,6 +191,6 @@ class Historian:
 
             event = encoder.check_button_event()
             if event == "long":
-                return
+                return  # Exit details screen
 
             time.sleep(0.01)

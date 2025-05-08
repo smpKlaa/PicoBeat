@@ -18,18 +18,22 @@ button = Pin(12, Pin.IN, Pin.PULL_UP)
 #peaks =  [820, 830, 840, 830, 840, 850, 860, 870, 860, 850]
 
 
+# --- HRV Analysis Functions ---
+
 def calculate_hrv(peaks):
     if len(peaks) < 2: return None  # Absolute minimum
     if len(peaks) < 5: print("Warning: Low reliability")  # Still calculate
     
     # Calculate mean PPI (peak-to-peak interval)
+    # Mean PPI (ms) = average interval between heartbeats
     mean_ppi = sum(peaks) / len(peaks)
     if mean_ppi <= 0: return None
     
     # Calculate mean HR (beats per minute)
+    # Heart rate (bpm) = 60000 ms (1 min) divided by average interval
     mean_hr = 60000 / mean_ppi  # 60000ms = 1 minute
     
-    # Calculate SDNN (standard deviation of intervals)
+    # Calculate SDNN (standard deviation of of all PPI values)
     squared_diffs = [(x - mean_ppi)**2 for x in peaks]
     variance = sum(squared_diffs) / len(peaks)
     sdnn = math.sqrt(variance)
@@ -39,7 +43,7 @@ def calculate_hrv(peaks):
     squared_diffs = [d**2 for d in diffs]
     rmssd = math.sqrt(sum(squared_diffs)/len(squared_diffs)) if len(diffs) >=1 else 0
     
-    # Timestamp. Not displayed on Oled due to space concerns
+    # Timestamp. Not displayed on Oled due to space concerns. adjusted for local time (e.g., UTC+3)
     timestamp = time.time() + 3 * 3600
     
     return {
@@ -55,9 +59,8 @@ def calculate_hrv(peaks):
 def display_results(results):
     oled.fill(0)
     
-    # Display header with analysis ID
+    # Display header and each HRV metric
     oled.text(f"BASIC ANALYSIS:", 0, 0)
-    # Display metrics (4 lines with 10px spacing)
     oled.text(f"HR: {results['mean_hr']:.0f}bpm", 0, 12)
     oled.text(f"PPI: {results['mean_ppi']:.0f}ms", 0, 24)
     oled.text(f"SDNN: {results['sdnn']:.0f}ms", 0, 36)
@@ -71,6 +74,7 @@ def analyze_and_display(peaks, historian_instance):
     results = calculate_hrv(peaks)
     
     if results:
+        # Save results to history and display on screen
         historian_instance.add_measurement(results)
         display_results(results)
         
@@ -80,18 +84,20 @@ def analyze_and_display(peaks, historian_instance):
             print(f"{key}: {value}")
         
     else:
+        # Show error message on OLED
         oled.fill(0)
         oled.text("Analysis failed", 0, 16)
         oled.text("Not enough data", 0, 32)
         oled.show()
     
+    # Wait for user to press and release button to continue
     while True:
         if button.value() == 1:
             time.sleep(0.05)
             if button.value() == 0:
                 return
 
-
+# --- Test Entry Point ---
 
 if __name__ == "__main__":
     analyze_and_display(peaks)
