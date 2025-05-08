@@ -14,7 +14,7 @@
   	["lib/rollingaverage.py", "http://localhost:8000/lib/rollingaverage.py"],
   	["hr_algo.py", "http://localhost:8000/hr_algo.py"],
     ["introtext.py", "http://localhost:8000/introtext.py"],
-    ["WIP_HRV.py", "http://localhost:8000/WIP_HRV.py"],
+    ["hrvanalysis.py", "http://localhost:8000/hrvanalysis.py"],
     ["main.py", "http://localhost:8000/main.py"],
     ["menuicons.py", "http://localhost:8000/menuicons.py"]
   ],

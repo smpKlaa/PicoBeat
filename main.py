@@ -10,7 +10,7 @@ import time
 import json
 import ssd1306
 import mip
-import WIP_HRV
+import hrvanalysis
 import introtext
 
 SSID = "KMD657_Group_6"
@@ -137,7 +137,7 @@ class Main:
             self.change_state(self.mainmenu)
             return
         # Analyze and display results.
-        WIP_HRV.analyze_and_display(peaks, self.historian)
+        hrvanalysis.analyze_and_display(peaks, self.historian)
         # Change state back to main menu.
         self.change_state(self.mainmenu)
         
