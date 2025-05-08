@@ -26,51 +26,26 @@ class HRA:
         PARAMS:
         display(SSD1306 object): if for passing OLED object.
         """
-        
-        # INITALIZE DISPLAY. ---------------------------------------------------
+        # INITALIZE DISPLAY.
         if not display:
             # Initialize I2C pin and channel
             i2c = I2C(1, sda=Pin(HRA.SDA_PIN), scl=Pin(HRA.SCL_PIN), freq=400000)
             i2c.scan()
             # Initialize OLED with I2C pin
             display = ssd1306.SSD1306_I2C(128, 64, i2c)
-            
         self.OLED = display        
-        
-        # INITIALIZE HR SENSOR. ------------------------------------------------
+        # INITIALIZE HR SENSOR.
         self.sensor = IRS_ADC(HRA.SENSOR_PIN)
-        
-        # GPIO PINS ------------------------------------------------------------
+        # GPIO PINS
         self.rot_button = Pin(12, mode = Pin.IN, pull = Pin.PULL_UP)
-
-        # Algorithm vars -------------------------------------------------------
-#         self.max_value = None							# Max value of current peak
-#         self.sample_n = 0								# Total amount of samples
-#         self.peaks = []									# All recorded peaks
-#         self.last_samples_avg_10 = RollAvg(size=10)		# Rolling average of last 10 samples
-#         self.last_samples_avg_40 = RollAvg(size=40)		# Rolling average of last 40 samples
-#         self.last_samples_raw = Filo(250, typecode = "i")# Last 250 raw sample values
-#         self.last_peak = None 							# Last peak timestamp(tick)
-#         self.bpm = 0									# Current BPM
-#         self.lts_min = None								# Last second lowest value
-#         self.lts_max = None								# Last second highest value
-#         self.ppi_roll_avg = RollAvg(size=10)			# Rolling average of last 10 PPI(ms)
-#         self.cur_cooldown = 0							# Time since artifact(ms)
-#         self.last_artifact_timestamp = 0				# Last artifact timestamp(tick)
-#         self.artifact_count = 0							# Total amount of artifacts
-#         self.thread_running = True						# Global flag for stopping 2. thread
-        
-#         self.fill_buffer()
-        
-#     def execute(self):
-#         self._function()
-
-    def start_recording(self, mode=None):
+    
+    
+    def start_recording(self, mode=None): # ------------------------------------
         self.OLED.fill(0)
         self.OLED.text("Initializing...", 0, 0, 1)
         self.OLED.show()
         
-        # Algorithm vars -------------------------------------------------------
+        # Algorithm vars
         self.max_value = None							# Max value of current peak
         self.sample_n = 0								# Total amount of samples
         self.peaks = []									# All recorded peaks
@@ -102,7 +77,7 @@ class HRA:
         return self.record_hrv()
 
     
-    def fill_buffer(self):
+    def fill_buffer(self): # ---------------------------------------------------
         # Find pulse and min-max values.
         print("Initializing...")
         while True :
@@ -117,12 +92,10 @@ class HRA:
                 else:
                     self.sample_n = 0
                 self.last_samples_raw.put(smpl)	# Store value for min-max
-
-        print("Init done")
-#         self.record_hrv()
+        print("Buffer ready")
         
     
-    def record_hrv(self):
+    def record_hrv(self): # ----------------------------------------------------
         
         # Main program =========================================================
         print("Main program start")
@@ -143,8 +116,10 @@ class HRA:
             line_buffer.append(value)
             return
         
+        # Is enough data collected for anaylsis.
         self.measurement_ready = False
         btn_pressed = False
+        
         while True:
             # Rotary button stops recording.
             if self.rot_button() == 0:
@@ -154,8 +129,8 @@ class HRA:
                 break
             if self.last_samples_avg_10.count > 0:
                 
+                # If measurement is not ready, update progress.
                 if self.mode == 1 or self.mode == 2:
-                    # If measurement is not ready, update progress.
                     if not self.measurement_ready:
                         progress = time.ticks_diff(time.ticks_ms(), self.start_time) / 30000
                         if progress >= 1:
@@ -164,6 +139,7 @@ class HRA:
                 
                 self.OLED.fill(0)
                 
+                # Display READY text if enough data is collected.
                 if self.measurement_ready:
                     self.OLED.text("READY", 87, 0)
                 self.OLED.text(f"BPM:{self.bpm}", 0, 0)				# Current BPM
@@ -172,18 +148,21 @@ class HRA:
                 add_to_line(y)
                 
                 # Threshold line for debugging.
+                # DEBUG
 #                self.OLED.line(0, 25, 127, 25, 1)
                 
-                # Draw graph to screen.
+                # Draw PPG graph to screen.
                 for x in range(1, len(line_buffer)):
                     self.OLED.line((x - 1) * 2, line_buffer[x - 1],
                                   (x * 2), line_buffer[x], 1)
                 
+                # Display recording progress bar.
                 if self.mode == 1 or self.mode == 2:
                     self.OLED.fill_rect(0, 60, int(127 * progress), 3, 1)
                 self.OLED.show()
         
-#         if (self.mode != 0):
+        # If not enough data is collected for analysis. Dispaly error and don't
+        # return PPI data.
         if (self.mode != 0) and (not self.measurement_ready):
             self.OLED.fill(0)
             self.OLED.text("Not enough data", 5, 24, 1)
@@ -193,10 +172,14 @@ class HRA:
         return self.peaks
 
 
-    # Function for 1. core. ----------------------------------------------------
+    # Function for core 1. .----------------------------------------------------
     def core_1_func(self):
+        # Core 1 collects the sensor data and processes it. All functionality
+        # apart from drawing on the OLED screen is found here.
+        
         print("[Core 1] Running...")
         
+        # Check thread running flag. Used for stopping thread 1.
         while self.thread_running:
             if self.sensor.has_data():
                 sample = self.sensor.get()	# Get sample from sensor fifo.
@@ -216,7 +199,7 @@ class HRA:
                 
                 self.sample_n += 1					# Keep track of total recorded samples
                 
-                # Calculate peak-to-peak interval. -----------------------------
+                # Calculate peak-to-peak interval.
                 interval = 0	# Time since last peak, in milliseconds
                 if self.last_peak != None :
                     # Calculate the time since last peak in milliseconds
@@ -226,12 +209,12 @@ class HRA:
                     # Not the best approach. Maybe FIX.
                     interval = time.ticks_diff(time.ticks_ms(), self.start_time)
                 
-                # Check for peak. ----------------------------------------------
+                # Check for peak.
                 if self.is_peak(sample):
                     print("PEAK")
                     self.last_peak = time.ticks_ms()
                     
-                    # Filter heart beat echo
+                    # Filter heart beat echo and impossible heart rates.
                     if interval < 300:
                         continue
                     elif interval > 1700:
@@ -243,14 +226,15 @@ class HRA:
                     self.bpm = int(60 / (self.ppi_avg / 1000))
 
     # Find min and max values of recent values
-    def find_min_max(self):
-        # max and min functions may be slow.
+    def find_min_max(self): # --------------------------------------------------
+        # Max and min functions are slow. But this function is called only once
+        # per second.
         self.lts_max = max(self.last_samples_raw.data)
         self.lts_min = min(self.last_samples_raw.data)
 
 
     # Normalize any sample value to 0-1
-    def normalize(self, sample_value):
+    def normalize(self, sample_value): # ---------------------------------------
         # Find min and max values every second.
         if self.sample_n % 250 == 0:
             self.find_min_max()
@@ -269,8 +253,7 @@ class HRA:
     
     
     # Check if sample value is peak
-    def is_peak(self, sample_value):
-        
+    def is_peak(self, sample_value): # -----------------------------------------
         # Filter noisy samples with last 10 sample average.
         sample_value = self.last_samples_avg_10.get()
         
@@ -287,14 +270,13 @@ class HRA:
 
 
     # Update all rolling averages with new value
-    def update_rolling_averages(self, val):
+    def update_rolling_averages(self, val): # ----------------------------------
         self.last_samples_avg_10.update(val)	# Last 10 sample average value
         self.last_samples_avg_40.update(val)	# Last 40 sample average value
 
 
     # Stop program
-    def stop(self):
-        
+    def stop(self): # ----------------------------------------------------------
         # Print total samples recorded.
         # DEBUG
         print(f"Total samples recorded: {self.sample_n}")
@@ -305,7 +287,7 @@ class HRA:
         
         # Stop timer.
         self.sensor_timer.deinit()
-        # Stop 2. thread.
+        # Stop thread 1.
         self.thread_running = False
         # Empty sensor fifo
         self.sensor.reset_fifo()

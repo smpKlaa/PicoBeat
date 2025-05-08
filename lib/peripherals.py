@@ -14,6 +14,7 @@ class RotaryEncoder:
     PARAMS:
     rot_a(int): GPIO pin of the rotary encoders a pin.
     rot_b(int): GPIO pin of the rotary encoders b pin.
+    button(int): GPIO pin of the rotary push button.
     flip(bool: False):  Boolean for flipping the direction of the rotary encoder.
     scroll_speed(int): How many actions before scroll event happens. Bigger is slower.
     """
