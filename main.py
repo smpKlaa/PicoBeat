@@ -189,7 +189,8 @@ class Main:
             print("ERROR: Kubios invalid request")
             self.display_error("INVALIDREQUEST")
             return
-        self.historian.add_measurement(response, networker=self.net)        
+        self.historian.add_measurement(response, networker=self.net)
+        self.historian.view_details(self.OLED, response, self.re)
         print("Kubios results saved")
         
         
