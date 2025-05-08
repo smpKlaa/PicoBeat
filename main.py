@@ -137,7 +137,7 @@ class Main:
             self.change_state(self.mainmenu)
             return
         # Analyze and display results.
-        hrvanalysis.analyze_and_display(peaks, self.historian)
+        hrvanalysis.analyze_and_display(peaks, self.historian, self.net)
         # Change state back to main menu.
         self.change_state(self.mainmenu)
         
@@ -157,6 +157,7 @@ class Main:
             print("WARNING: Not enough data for Kubios HRV analysis")
             self.change_state(self.mainmenu)
             return
+        
         # Define MQTT payload.
         payload = {
             "id": time.time(),	# Current time as ID
@@ -188,7 +189,7 @@ class Main:
             print("ERROR: Kubios invalid request")
             self.display_error("INVALIDREQUEST")
             return
-        self.historian.add_measurement(response)
+        self.historian.add_measurement(response, networker=self.net)        
         print("Kubios results saved")
         
         

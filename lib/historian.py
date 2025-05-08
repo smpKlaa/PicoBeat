@@ -34,12 +34,45 @@ class Historian:
         # Sort from newest to oldest
         self.saved_measurements.sort(key=lambda x: x["time"], reverse=True)
             
-    def add_measurement(self, measurement):
+    def add_measurement(self, measurement, networker=None):
 #         measurement = json.loads(measurement)
         # Ensure the measurement has a timestamp
         if not "time" in measurement:
             measurement["time"] = time.time() + 3 * 3600
+        
+        # Save analysis results to the Kubios proxy website.
+        if networker != None:	# Check if networker module is passed.
+            is_kubios = "data" in measurement	# Check for Kubios results
 
+            # Define MQTT payload depending on the result type.
+            if is_kubios:
+                analysis = measurement["data"]["analysis"]
+                payload = {
+                    "id": measurement["id"],
+                    "timestamp": measurement["id"],
+                    "mean_hr": analysis['mean_hr_bpm'],
+                    "mean_ppi": analysis['mean_rr_ms'],
+                    "rmssd": analysis['rmssd_ms'],
+                    "sdnn": analysis['sdnn_ms'],
+                    "sns": analysis['sns_index'],
+                    "pns": analysis['pns_index']
+                }
+            else:
+                payload = {
+                    "id": measurement["id"],
+                    "timestamp": measurement["id"],
+                    "mean_hr": measurement['mean_hr'],
+                    "mean_ppi": measurement['mean_ppi'],
+                    "rmssd": measurement['rmssd'],
+                    "sdnn": measurement['sdnn'],
+                    "sns": "None",
+                    "pns": "None"
+                }
+            
+            # Send data to Kubios proxy server.
+            print("Sending data to database")
+            networker.publish("hr-data", json.dumps(payload))
+        
         try:
             with open(self.filename, "a") as f:
                 json.dump(measurement, f)

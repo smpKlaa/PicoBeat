@@ -68,14 +68,18 @@ def display_results(results):
     
     oled.show()
 
-def analyze_and_display(peaks, historian_instance):
+def analyze_and_display(peaks, historian_instance, networker=None):
     global button
     # Calculate HRV metrics
     results = calculate_hrv(peaks)
     
     if results:
-        # Save results to history and display on screen
-        historian_instance.add_measurement(results)
+        if networker:
+            # Save results to history and display on screen
+            historian_instance.add_measurement(results, networker=networker)
+        else:
+            # Save results to history and display on screen
+            historian_instance.add_measurement(results)
         display_results(results)
         
         # Print to console for debugging
